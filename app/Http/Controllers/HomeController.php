@@ -12,6 +12,12 @@ use App\Models\Product;
 
 use App\Models\Cart2;
 
+use App\Models\Order;
+
+use Session;
+
+use Stripe;
+
 class HomeController extends Controller
 {
     public function index() {
@@ -56,7 +62,7 @@ class HomeController extends Controller
 
             $cart->product_title=$product->title;
 
-            $cart->quantity=$request->quantity;
+            $cart->quantity=$product->quantity;
 
 
             if($product->discount_price!=null)
@@ -109,5 +115,97 @@ class HomeController extends Controller
         $cart->delete();
 
         return redirect()->back();
+    }
+
+    public function cash_order(){
+        $user=Auth::user();
+
+        $userid=$user->id;
+
+        $data=cart2::where('user_id', '=', $userid)->get();
+
+        foreach($data as $data)
+        {
+            $order = new order;
+
+            $order->product_title=$data->product_title;
+            $order->email=$data->email;
+            $order->address=$data->address;
+            $order->user_id=$data->user_id;
+            $order->product_details=$data->product_title;
+            $order->price=$data->price;
+            $order->quantity=$data->quantity;
+            $order->image=$data->image;
+            $order->product_id=$data->product_id;
+
+            $order->payment_status='cash on delivery';
+            $order->delivery_status='processing';
+
+            $order->save();
+
+
+            $cart_id=$data->id;
+            $cart=cart2::find($cart_id);
+
+
+
+
+
+        }
+
+        return redirect()->back()->with('message', 'Your Order Was Placed Successfully');
+    }
+
+    public function stripe($totalprice) {
+        return view('home.stripe', compact('totalprice'));
+    }
+
+    public function stripePost($totalprice,Request $request )
+    {
+        Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+    
+        Stripe\Charge::create ([
+                "amount" => $totalprice * 100,
+                "currency" => "usd",
+                "source" => $request->stripeToken,
+                "description" => "Test payment from itsolutionstuff.com." 
+        ]);
+
+        $user=Auth::user();
+
+        $userid=$user->id;
+
+        $data=cart2::where('user_id', '=', $userid)->get();
+
+        foreach($data as $data)
+        {
+            $order = new order;
+
+            $order->product_title=$data->product_title;
+            $order->email=$data->email;
+            $order->address=$data->address;
+            $order->user_id=$data->user_id;
+            $order->product_details=$data->product_title;
+            $order->price=$data->price;
+            $order->quantity=$data->quantity;
+            $order->image=$data->image;
+            $order->product_id=$data->product_id;
+
+            $order->payment_status='Paid';
+            $order->delivery_status='processing';
+
+            $order->save();
+
+
+            $cart_id=$data->id;
+            $cart=cart2::find($cart_id);
+
+
+
+
+
+        }
+      
+        return redirect()->back()->with('message', 'Payment Successful');
     }
 }
