@@ -45,6 +45,16 @@
         <div class="main-panel">
             <div class="content-wrapper">
 
+                @if(session() -> has('message'))
+                <div class="alert alert-success">
+
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">X</button>
+                    {{session() -> get('message')}}
+                </div>
+
+                @endif
+
+
                 <h2 class="font-size">LISTED PRODUCTS</h2>
 
                 <table class="center">
@@ -56,6 +66,9 @@
                         <th class="th_deg">Price</th>
                         <th class="th_deg">Discount</th>
                         <th class="th_deg">Image</th>
+                        <th class="th_deg">Delete</th>
+                        <th class="th_deg">Edit</th>
+
 
                     </tr>
 
@@ -70,6 +83,15 @@
                         <td>{{$product->discount_price}}</td>
                         <td>
                             <img class="img_size" src="/product/{{$product->image}}">
+                        </td>
+
+                        <td>
+                            <a class="btn btn-danger"
+                                onclick="return confirm('Are You Sure You Want To Delete This Product?')"
+                                href="{{url('/delete_product', $product->id)}}">Delete</a>
+                        </td>
+                        <td>
+                            <a class="btn btn-success" href="{{url('/update_product', $product->id)}}">Edit</a>
                         </td>
 
                     </tr>

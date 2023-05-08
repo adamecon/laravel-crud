@@ -8,10 +8,14 @@ use Illuminate\Support\Facades\Auth;
 
 use App\Models\User;
 
+use App\Models\Product;
+
 class HomeController extends Controller
 {
     public function index() {
-        return view('home.userpage');
+
+        $product=Product::paginate(9);
+        return view('home.userpage', compact('product'));
     }
     public function redirect() {
         $usertype = Auth::user()->usertype;
@@ -20,7 +24,9 @@ class HomeController extends Controller
             return view('admin.home');
         }
         else{
-            return view('home.userpage');
+            $product=Product::paginate(9);
+            return view('home.userpage', compact('product'));
+        
         }
     }
 }
