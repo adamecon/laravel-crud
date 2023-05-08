@@ -10,6 +10,8 @@ use App\Models\User;
 
 use App\Models\Product;
 
+use App\Models\Cart2;
+
 class HomeController extends Controller
 {
     public function index() {
@@ -36,14 +38,76 @@ class HomeController extends Controller
         return view('home.product_details', compact('product'));
     }
 
-    public function add_cart($id){
+    public function add_cart(Request $request, $id){
 
         if(Auth::id()){
+            
+            $user=Auth::user();
+
+            $product=product::find($id);
+
+            $cart=new cart2;
+            
+            $cart->name=$user->name;
+            $cart->email=$user->email;
+            $cart->phone=$user->phone;
+            $cart->address=$user->address;
+            $cart->user_id=$user->id;
+
+            $cart->product_title=$product->title;
+
+            $cart->quantity=$request->quantity;
+
+
+            if($product->discount_price!=null)
+            {
+                $cart->price=$product->discount_price * $request->quantity;
+            }
+            else{
+                $cart->price=$product->price * $request->quantity;
+            }
+            
+            $cart->product_id=$product->id;
+            $cart->image=$product->image;
+
+            $cart->save();
+
             return redirect()->back();
+            
+
+
+
+
         }
         else{
             return redirect('login');
         }
 
+    }
+    public function show_cart(){
+
+        if(Auth::id())
+        {
+        $id=Auth::user()->id;
+
+        $cart=cart2::where('user_id','=',$id)->get();
+
+
+        return view('home.show_cart', compact('cart'));
+        }
+
+        else{
+            return redirect('login');
+        }
+
+        
+    }
+
+    public function remove_cart($id) {
+        $cart=cart2::find($id);
+
+        $cart->delete();
+
+        return redirect()->back();
     }
 }

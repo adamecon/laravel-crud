@@ -73,7 +73,23 @@
                 <h6>Description: {{$product->description}}</h6>
                 <h6>Stock: {{$product->quantity}}</h6>
 
-                <a href="" class="btn btn-primary">Add To Cart</a>
+                <form action="{{url('/add_cart', $product->id)}}" method="POST">
+
+                    @csrf
+
+                    <div class="row">
+
+                        <div lass="col md-4">
+                            <input type="number" name="" value="1" min="1" style="width: 100px;">
+                        </div>
+                        <div class="col md-4">
+                            <input type="submit" value="Add To Cart">
+                        </div>
+
+
+                    </div>
+
+                </form>
 
 
 
